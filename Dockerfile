@@ -9,8 +9,13 @@ RUN apt-get update && \
 # 3. Server ke andar ek working directory set karna
 WORKDIR /app
 
-# 4. Requirements file copy karna aur libraries (Uvicorn, Whisper etc.) install karna
+# 4. Requirements file copy karna
 COPY requirements.txt .
+
+# FIX: Pehle pip, setuptools aur wheel ko update karo
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Phir apni baaki libraries install karo
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 5. Aapka baaki saara backend code server me copy karna
