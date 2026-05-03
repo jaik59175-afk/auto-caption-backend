@@ -12,8 +12,8 @@ WORKDIR /app
 # 4. Requirements file copy karna
 COPY requirements.txt .
 
-# FIX: Pehle pip, setuptools aur wheel ko update karo
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+# FIX: Setuptools ka stable version daalna jisme pkg_resources available ho
+RUN pip install --no-cache-dir --upgrade pip "setuptools<70.0.0" wheel
 
 # Phir apni baaki libraries install karo
 RUN pip install --no-cache-dir -r requirements.txt
