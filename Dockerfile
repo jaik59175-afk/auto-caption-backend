@@ -1,28 +1,34 @@
-# 1. Python install karne ke liye official base image
+# 1. Official Python image
 FROM python:3.10-slim
 
-# 2. FFmpeg aur zaroori tools install karne ki command
+# 2. Install FFmpeg and Git (Git is required for Whisper)
 RUN apt-get update && \
     apt-get install -y ffmpeg git && \
     rm -rf /var/lib/apt/lists/*
 
-# 3. Server ke andar ek working directory set karna
+# 3. Set Working Directory
 WORKDIR /app
 
-# 4. Requirements file copy karna
+# 4. Copy requirements
 COPY requirements.txt .
 
-# FIX: Setuptools ka stable version daalna jisme pkg_resources available ho
-RUN pip install --no-cache-dir --upgrade pip "setuptools<70.0.0" wheel
+# FIX: Sabse pehle core tools ko ek specific purane version par lock kar do
+# Isse Whisper ko build ke waqt pkg_resources mil jayega
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir "setuptools<70.0.0" wheel
 
-# Phir apni baaki libraries install karo
+# Whisper ko alag se install karenge bina build isolate kiye
+# Isse ye humare install kiye hue setuptools ko hi use karega
+RUN pip install --no-cache-dir openai-whisper==20231117 --no-build-isolation
+
+# Baaki saari requirements install karo
 RUN pip install --no-cache-dir -r requirements.txt
 
-# 5. Aapka baaki saara backend code server me copy karna
+# 5. Copy remaining code
 COPY . .
 
-# 6. Zaroori folders banana taaki upload/export me error na aaye
+# 6. Prepare directories
 RUN mkdir -p uploads exports temp
 
-# 7. Uvicorn ke through FastAPI server start karne ki command
+# 7. Start Command
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "10000"]
